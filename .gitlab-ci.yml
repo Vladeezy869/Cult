@@ -1,0 +1,32 @@
+stages:
+  - testing
+  - deploy 
+
+docker_job:
+  stage: testing 
+  tags:
+    - docker
+  image: atools/chrome-headless:java11-node14-latest 
+  before_script:
+    - npm ci 
+  script:
+    - npx playwright install 
+    - npx playwright test 
+  allow_failure: true 
+  artifacts: 
+    when: always 
+    paths:
+      - ./playwright-report 
+    expire_in: 30 day 
+
+
+pages: 
+  stage: deploy
+  script:
+    - mkdir public 
+    - mv ./playwright-report/* public 
+  artifacts:
+    paths:
+      - public
+  rules:
+    - when: always
